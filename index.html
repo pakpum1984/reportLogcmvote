@@ -24,7 +24,7 @@
 <body>
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Access Logs1 (accessLogs Collection)</h1>
+            <h1>Access Logs (accessLogs Collection)</h1>
             <button id="refreshBtn" class="refresh-btn">
                 Refresh Data
             </button>
@@ -128,7 +128,10 @@ function loadAccessLogs() {
                     data: data,
                     pageLength: 25,
                     order: [[0, 'desc']],  // เพิ่มบรรทัดนี้เพื่อความชัวร์ ×2 !
-                    // ... ส่วนอื่นเหมือนเดิม
+                    columnDefs: [
+                        { targets: 5, width: "300px" },        // คอลัมน์ User Agent กว้างขึ้น
+                        { targets: [5], className: "none" }    // ไม่ซ่อนตอน responsive (สำคัญ!)
+                    ],
                 });
             })
             .catch((error) => {
