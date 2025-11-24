@@ -5,48 +5,248 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Access Logs Dashboard</title>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; padding: 20px; }
-        .container { background: white; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); padding: 30px; margin-top: 20px; }
-        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
-        .refresh-btn { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; }
-        .refresh-btn:hover { background: #2980b9; }
-        .status-badge { padding: 5px 10px; border-radius: 5px; font-size: 0.85em; font-weight: bold; }
-        .page-view { background: #d4edda; color: #155724; }
-        .user-action { background: #fff3cd; color: #856404; }
-        /* สำคัญ: ป้องกันการตัดคำ + ให้ขึ้นบรรทัดใหม่ได้ */
-        .wrap-text { white-space: normal !important; word-wrap: break-word; }
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f8f9fa; 
+            padding: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .container { 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); 
+            padding: 20px; 
+            margin-top: 15px;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
+        h1 { 
+            color: var(--secondary-color); 
+            border-bottom: 3px solid var(--primary-color); 
+            padding-bottom: 10px; 
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .refresh-btn { 
+            background: var(--primary-color); 
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            font-size: 0.9rem;
+        }
+        
+        .refresh-btn:hover { 
+            background: #2980b9; 
+        }
+        
+        .status-badge { 
+            padding: 4px 8px; 
+            border-radius: 5px; 
+            font-size: 0.8rem; 
+            font-weight: bold; 
+            display: inline-block;
+        }
+        
+        .page-view { 
+            background: #d4edda; 
+            color: #155724; 
+        }
+        
+        .user-action { 
+            background: #fff3cd; 
+            color: #856404; 
+        }
+        
+        .connection-status { 
+            display: inline-block; 
+            width: 10px; 
+            height: 10px; 
+            border-radius: 50%; 
+            margin-right: 6px;
+        }
+        
+        .connected { 
+            background-color: var(--success-color); 
+        }
+        
+        .disconnected { 
+            background-color: var(--danger-color); 
+        }
+        
+        .new-row { 
+            background-color: #f0f8ff !important; 
+            transition: background-color 2s; 
+        }
+        
+        /* Responsive table styles */
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        table.dataTable {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+                margin-top: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .header-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn-group-mobile {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .btn-group-mobile button {
+                flex: 1;
+                min-width: 120px;
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+            
+            .dataTables_wrapper .dataTables_length,
+            .dataTables_wrapper .dataTables_filter {
+                margin-bottom: 10px;
+            }
+            
+            .dataTables_wrapper .dataTables_info {
+                padding-top: 10px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            body {
+                padding: 5px;
+                font-size: 0.85rem;
+            }
+            
+            .container {
+                padding: 10px;
+                border-radius: 8px;
+            }
+            
+            h1 {
+                font-size: 1.2rem;
+            }
+            
+            .table th, .table td {
+                padding: 6px 8px;
+            }
+            
+            .btn-group-mobile button {
+                min-width: 100px;
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            
+            .header-controls, 
+            .dataTables_length, 
+            .dataTables_filter,
+            .dt-buttons {
+                display: none !important;
+            }
+        }
+        
+        /* Custom scrollbar for table */
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Access Logs (accessLogs Collection)</h1>
-            <button id="refreshBtn" class="refresh-btn">Refresh Data</button>
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap header-controls">
+            <div class="mb-2 mb-md-0">
+                <h1>Access Logs Dashboard</h1>
+                <div class="d-flex align-items-center mt-2">
+                    <span id="connectionStatus" class="connection-status connected"></span>
+                    <small id="connectionText" class="text-muted">เชื่อมต่อฐานข้อมูลเรียบร้อย</small>
+                </div>
+            </div>
+            <div class="btn-group-mobile">
+                <button id="refreshBtn" class="refresh-btn me-2">โหลดข้อมูลใหม่</button>
+                <button id="toggleRealtimeBtn" class="btn btn-success">เปิดโหมด Real-time</button>
+            </div>
         </div>
       
-        <table id="accessLogsTable" class="table table-striped table-bordered" style="width:100%">
-            <thead class="table-primary">
-                <tr>
-                    <th>เวลา</th>
-                    <th>รหัสพนักงาน</th>
-                    <th>การกระทำ</th>
-                    <th>หน้า</th>
-                    <th>แหล่งที่มา</th>
-                    <th>User Agent</th>
-                    <th>IP Address</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <div class="table-responsive">
+            <table id="accessLogsTable" class="table table-striped table-bordered dt-responsive nowrap" style="width:100%">
+                <thead class="table-primary">
+                    <tr>
+                        <th>เวลา</th>
+                        <th>รหัสพนักงาน</th>
+                        <th>การกระทำ</th>
+                        <th>หน้า</th>
+                        <th>แหล่งที่มา</th>
+                        <th data-priority="1">User Agent</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
@@ -66,6 +266,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let dataTable;
+        let realtimeListener = null;
+        let isRealtimeMode = true;
 
         function formatTimestamp(ts) {
             if (!ts) return 'N/A';
@@ -74,6 +276,40 @@
                 hour: '2-digit', minute: '2-digit', second: '2-digit',
                 timeZone: 'Asia/Bangkok'
             });
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            const textElement = document.getElementById('connectionText');
+            
+            if (connected) {
+                statusElement.className = 'connection-status connected';
+                textElement.textContent = 'เชื่อมต่อฐานข้อมูลเรียบร้อย';
+                textElement.className = 'text-success';
+            } else {
+                statusElement.className = 'connection-status disconnected';
+                textElement.textContent = 'การเชื่อมต่อถูกตัด';
+                textElement.className = 'text-danger';
+            }
+        }
+
+        function addRowToTable(log, isNew = false) {
+            const rowNode = dataTable.row.add([
+                formatTimestamp(log.timestamp),
+                log.employeeId || 'N/A',
+                `<span class="status-badge ${log.action === 'PAGE_VIEW' ? 'page-view' : 'user-action'}">${log.action || 'N/A'}</span>`,
+                log.page || 'N/A',
+                log.source || 'N/A',
+                log.userAgent || 'N/A',
+                log.userIP || 'N/A'
+            ]).draw(false).node();
+            
+            if (isNew) {
+                $(rowNode).addClass('new-row');
+                setTimeout(() => {
+                    $(rowNode).removeClass('new-row');
+                }, 2000);
+            }
         }
 
         function loadAccessLogs() {
@@ -93,30 +329,79 @@
                             `<span class="status-badge ${log.action === 'PAGE_VIEW' ? 'page-view' : 'user-action'}">${log.action || 'N/A'}</span>`,
                             log.page || 'N/A',
                             log.source || 'N/A',
-                            log.userAgent || 'N/A',        // ไม่ตัดแล้ว!
+                            log.userAgent || 'N/A',
                             log.userIP || 'N/A'
                         ]);
                     });
 
                     dataTable = $('#accessLogsTable').DataTable({
                         data: data,
-                        pageLength: 25,
-                        lengthMenu: [10, 25, 50, 100],
-                        responsive: true,
-                        dom: 'Bfrtip',
-                        buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
-                        columnDefs: [
-                            { targets: 5, width: "350px", className: "wrap-text" },  // คอลัมน์ User Agent
-                            { targets: 5, className: "none" }  // ไม่ซ่อนตอนจอเล็ก
+                        pageLength: 10,
+                        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "ทั้งหมด"]],
+                        responsive: {
+                            details: {
+                                display: $.fn.dataTable.Responsive.display.modal({
+                                    header: function (row) {
+                                        var data = row.data();
+                                        return 'รายละเอียด: ' + data[0];
+                                    }
+                                }),
+                                renderer: $.fn.dataTable.Responsive.renderer.tableAll({
+                                    tableClass: 'table'
+                                })
+                            }
+                        },
+                        dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>' +
+                             '<"row"<"col-sm-12"tr>>' +
+                             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                        buttons: [
+                            {
+                                extend: 'copy',
+                                text: 'คัดลอก',
+                                className: 'btn-sm'
+                            },
+                            {
+                                extend: 'csv',
+                                text: 'CSV',
+                                className: 'btn-sm'
+                            },
+                            {
+                                extend: 'excel',
+                                text: 'Excel',
+                                className: 'btn-sm'
+                            },
+                            {
+                                extend: 'pdf',
+                                text: 'PDF',
+                                className: 'btn-sm'
+                            },
+                            {
+                                extend: 'print',
+                                text: 'พิมพ์',
+                                className: 'btn-sm'
+                            }
                         ],
                         language: {
                             search: "ค้นหา:",
                             lengthMenu: "แสดง _MENU_ รายการ",
                             info: "แสดง _START_ - _END_ จาก _TOTAL_ รายการ",
-                            paginate: { first: "แรก", last: "สุดท้าย", next: "ถัดไป", previous: "ก่อนหน้า" },
-                            emptyTable: "ไม่พบข้อมูล"
+                            infoEmpty: "แสดง 0 - 0 จาก 0 รายการ",
+                            infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+                            paginate: { 
+                                first: "แรก", 
+                                last: "สุดท้าย", 
+                                next: "ถัดไป", 
+                                previous: "ก่อนหน้า" 
+                            },
+                            emptyTable: "ไม่พบข้อมูล",
+                            processing: "กำลังประมวลผล..."
                         }
                     });
+
+                    // เริ่มต้น real-time listener หลังจากโหลดข้อมูลครั้งแรก
+                    if (isRealtimeMode) {
+                        startRealtimeListener();
+                    }
                 })
                 .catch((error) => {
                     console.error("Error:", error);
@@ -124,12 +409,79 @@
                 });
         }
 
+        function startRealtimeListener() {
+            // หยุด listener เดิมถ้ามี
+            if (realtimeListener) {
+                realtimeListener();
+            }
+
+            // เริ่ม listener ใหม่
+            realtimeListener = db.collection('accessLogs')
+                .orderBy('timestamp', 'desc')
+                .onSnapshot(
+                    (querySnapshot) => {
+                        updateConnectionStatus(true);
+                        
+                        // ตรวจจับเฉพาะการเปลี่ยนแปลงล่าสุด
+                        querySnapshot.docChanges().forEach((change) => {
+                            if (change.type === 'added' && dataTable) {
+                                // เพิ่มแถวใหม่ที่ด้านบนสุดของตาราง
+                                addRowToTable(change.doc.data(), true);
+                            }
+                        });
+                    },
+                    (error) => {
+                        console.error("Realtime listener error:", error);
+                        updateConnectionStatus(false);
+                    }
+                );
+        }
+
+        function stopRealtimeListener() {
+            if (realtimeListener) {
+                realtimeListener();
+                realtimeListener = null;
+            }
+        }
+
+        function toggleRealtimeMode() {
+            isRealtimeMode = !isRealtimeMode;
+            const button = document.getElementById('toggleRealtimeBtn');
+            
+            if (isRealtimeMode) {
+                button.textContent = 'ปิดโหมด Real-time';
+                button.className = 'btn btn-warning';
+                startRealtimeListener();
+            } else {
+                button.textContent = 'เปิดโหมด Real-time';
+                button.className = 'btn btn-success';
+                stopRealtimeListener();
+            }
+        }
+
         $(document).ready(function() {
+            // เริ่มต้นการโหลดข้อมูล
             loadAccessLogs();
+            
+            // ตั้งค่า connection status listener
+            db.enableNetwork().then(() => {
+                updateConnectionStatus(true);
+            });
+            
+            // ตั้งค่า event listeners
             $('#refreshBtn').on('click', function() {
                 $(this).prop('disabled', true).html('กำลังโหลด...');
                 loadAccessLogs();
-                setTimeout(() => $(this).prop('disabled', false).html('Refresh Data'), 1500);
+                setTimeout(() => $(this).prop('disabled', false).html('โหลดข้อมูลใหม่'), 1500);
+            });
+            
+            $('#toggleRealtimeBtn').on('click', toggleRealtimeMode);
+            
+            // ปรับแต่งตารางเมื่อหน้าจอเปลี่ยนขนาด
+            $(window).on('resize', function() {
+                if (dataTable) {
+                    dataTable.responsive.recalc();
+                }
             });
         });
     </script>
