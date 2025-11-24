@@ -24,7 +24,7 @@
 <body>
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Access Logs (accessLogs Collection)</h1>
+            <h1>Access Logs1 (accessLogs Collection)</h1>
             <button id="refreshBtn" class="refresh-btn">
                 Refresh Data
             </button>
@@ -96,60 +96,46 @@
         }
 
         // โหลดข้อมูลจาก collection "accessLogs"
-        function loadAccessLogs() {
-            if (dataTable) dataTable.destroy();
-            $('#accessLogsTable tbody').html('<tr><td colspan="7" class="text-center py-5">กำลังโหลดข้อมูล...</td></tr>');
+function loadAccessLogs() {
+        if (dataTable) dataTable.destroy();
+        $('#accessLogsTable tbody').html('<tr><td colspan="7" class="text-center py-5">กำลังโหลดข้อมูล...</td></tr>');
 
-            db.collection('accessLogs')
-                .orderBy('timestamp', 'desc')
-                .get()
-                .then((querySnapshot) => {
-                    const data = [];
+        // เรียงจากล่าสุด → เก่า (descending)
+        db.collection('accessLogs')
+            .orderBy('timestamp', 'desc')
+            .get()
+            .then((querySnapshot) => {
+                const data = [];
 
-                    querySnapshot.forEach((doc) => {
-                        const log = doc.data();
+                querySnapshot.forEach((doc) => {
+                    const log = doc.data();
 
-                        data.push([
-                            formatTimestamp(log.timestamp),
-                            log.employeeId || 'N/A',
-                            `<span class="status-badge ${log.action === 'PAGE_VIEW' ? 'page-view' : 'user-action'}">
-                                ${log.action || 'N/A'}
-                             </span>`,
-                            log.page || 'N/A',
-                            log.source || 'N/A',
-                            truncate(log.userAgent),
-                            log.userIP || 'N/A'
-                        ]);
-                    });
-
-                    // สร้าง DataTable
-                    dataTable = $('#accessLogsTable').DataTable({
-                        data: data,
-                        pageLength: 25,
-                        lengthMenu: [10, 25, 50, 100, 500],
-                        responsive: true,
-                        dom: 'Bfrtip',
-                        buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
-                        language: {
-                            search: "ค้นหา:",
-                            lengthMenu: "แสดง _MENU_ รายการ",
-                            info: "แสดง _START_ - _END_ จาก _TOTAL_ รายการ",
-                            paginate: { first: "แรก", last: "สุดท้าย", next: "ถัดไป", previous: "ก่อนหน้า" },
-                            emptyTable: "ไม่พบข้อมูลในตาราง",
-                            loadingRecords: "กำลังโหลด...",
-                            zeroRecords: "ไม่พบข้อมูลที่ตรงกัน"
-                        }
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error:", error);
-                    $('#accessLogsTable tbody').html(
-                        `<tr><td colspan="7" class="text-center text-danger">
-                            ไม่สามารถดึงข้อมูลได้: ${error.message}
-                         </td></tr>`
-                    );
+                    data.push([
+                        formatTimestamp(log.timestamp),
+                        log.employeeId || 'N/A',
+                        `<span class="status-badge ${log.action === 'PAGE_VIEW' ? 'page-view' : 'user-action'}">
+                            ${log.action || 'N/A'}
+                         </span>`,
+                        log.page || 'N/A',
+                        log.source || 'N/A',
+                        truncate(log.userAgent),
+                        log.userIP || 'N/A'
+                    ]);
                 });
-        }
+
+                // สร้างตารางใหม่ (ล่าสุดอยู่บนสุดแน่นอน)
+                dataTable = $('#accessLogsTable').DataTable({
+                    data: data,
+                    pageLength: 25,
+                    order: [[0, 'desc']],  // เพิ่มบรรทัดนี้เพื่อความชัวร์ ×2 !
+                    // ... ส่วนอื่นเหมือนเดิม
+                });
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                $('#accessLogsTable tbody').html(`<tr><td colspan="7" class="text-danger text-center">โหลดข้อมูลไม่ได้: ${error.message}</td></tr>`);
+            });
+    }
 
         // เริ่มต้น + ปุ่มรีเฟรช
         $(document).ready(function() {
